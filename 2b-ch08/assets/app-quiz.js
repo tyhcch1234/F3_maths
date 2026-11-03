@@ -106,6 +106,19 @@
   /* =======================================================
      小測
      ======================================================= */
+  // 把純文字選項轉成數學排版（避免出現 x^2 這種原文）
+  CH.opt = function (s) {
+    s = String(s);
+    if (/[<>]/.test(s)) return s;
+    if (/[\^0-9]/.test(s)) return '<span class="m">' + CH.fmt(s).replace(/(^|[\s(>])-/g, "$1\u2212") + "</span>";
+    return s;
+  };
+
+  function stars(lv) {
+    lv = lv || 1;
+    return "★".repeat(lv) + "☆".repeat(3 - lv);
+  }
+
   function buildQuiz(host, key, questions, opts) {
     opts = opts || {};
     var per = opts.final ? 15 : 10;
@@ -118,8 +131,8 @@
         var t = order[i]; order[i] = order[j]; order[j] = t;
       }
       return {
-        tag: q.tag, q: q.q, exp: q.exp,
-        opts: order.map(function (i) { return q.opts[i]; }),
+        tag: q.tag, q: q.q, exp: q.exp, lv: q.lv || 1,
+        opts: order.map(function (i) { return CH.opt(q.opts[i]); }),
         ans: order.indexOf(q.ans)
       };
     });
@@ -128,6 +141,7 @@
       return '<div class="qhead"><span class="qcount">第 ' + (idx + 1) + " / " + questions.length + " 題</span>" +
         '<span class="qtag ' + (questions[idx].tag === "new" ? "new" : "cum") + '">' +
         (questions[idx].tag === "new" ? "本節新學" : questions[idx].tag === "cum" ? "累積重溫" : "綜合挑戰") + "</span>" +
+        '<span class="qtag lv" title="難度">' + stars(questions[idx].lv) + "</span>" +
         '<div class="qprog"><i style="width:' + (idx / questions.length * 100) + '%"></i></div></div>';
     }
 
@@ -198,11 +212,14 @@
         (pct < 100 ? '<span class="pill">錯題已記錄</span>' : "") + "</div>" +
         '<div class="qfoot" style="justify-content:center">' +
         '<button class="btn" id="again">再試一次</button>' +
+        (STORE.tickets() > 0 ? '<button class="btn pink" id="draw">去抽卡 🎟 ' + STORE.tickets() + "</button>" : "") +
         (opts.next ? '<button class="btn primary" id="go">' + opts.next.label + "</button>" : "") +
         "</div></div>";
       host.querySelector("#again").onclick = function () { idx = 0; right = 0; firstTime = false; render(); };
       var go = host.querySelector("#go");
       if (go) go.onclick = function () { CH.goto(opts.next.id); };
+      var dr = host.querySelector("#draw");
+      if (dr) dr.onclick = function () { CH.goto("gacha"); };
     }
 
     render();
@@ -323,7 +340,7 @@
           '<div class="wq">' + w.q + "</div>" +
           '<div class="mrow"><span class="tagc">' + w.topic + "</span>" +
           '<span>你的答案：<span class="myans">' + LET[w.chosen] + ".</span></span>" +
-          '<span class="corr">正確答案：' + LET[w.ans] + ". " + w.opts[w.ans] + "</span></div>" +
+          '<span class="corr">正確答案：' + LET[w.ans] + ". " + CH.opt(w.opts[w.ans]) + "</span></div>" +
           '<div class="wexp">💡 ' + w.exp + "</div>" +
           '<div style="margin-top:10px"><button class="btn small primary" data-retry="' + i + '">重做這題</button></div>' +
           '<div class="retrybox"></div></div>';
@@ -338,7 +355,7 @@
         var w = list[+btn.dataset.retry];
         var box = btn.closest(".wrong-item").querySelector(".retrybox");
         box.innerHTML = '<div class="opts" style="margin-top:10px">' + w.opts.map(function (o, i) {
-          return '<button class="opt" data-k="' + i + '"><span class="k">' + LET[i] + "</span><span>" + o + "</span></button>";
+          return '<button class="opt" data-k="' + i + '"><span class="k">' + LET[i] + "</span><span>" + CH.opt(o) + "</span></button>";
         }).join("") + "</div>";
         box.querySelectorAll(".opt").forEach(function (ob) {
           ob.onclick = function () {

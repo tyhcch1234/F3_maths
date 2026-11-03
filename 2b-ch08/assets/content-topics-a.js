@@ -14,7 +14,7 @@
     });
     s = s.replace(/([A-Za-z]+)/g, "<i>$1</i>");
     s = s.replace(/\u0001(\d+)\u0002/g, function (_m, n) {
-      return "<sup>" + fmt(store[+n]) + "</sup>";
+      return "<sup>" + fmt(store[+n]).replace(/-/g, "\u2212") + "</sup>";
     });
     return s;
   }

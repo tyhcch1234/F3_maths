@@ -24,10 +24,16 @@
     document.querySelectorAll(".tabchip").forEach(function (chip) {
       if (STORE.s.best[chip.dataset.id]) chip.classList.add("done");
     });
+    var gchip = document.querySelector('.tabchip[data-id="gacha"]');
+    if (gchip) {
+      var tkN = STORE.tickets();
+      gchip.innerHTML = '<span class="num">🎟</span>抽卡' + (tkN > 0 ? '<b class="tkn">' + tkN + "</b>" : "");
+      gchip.classList.toggle("hot", tkN > 0);
+    }
     var mb = document.getElementById("modeBtn");
     if (mb) {
       var teacher = document.body.classList.contains("teacher");
-      mb.innerHTML = teacher ? '🧑‍🎓<span class="lbl"> 學生模式</span>' : '👩‍🏫<span class="lbl"> 老師模式</span>';
+      mb.innerHTML = teacher ? '👩‍🏫<span class="lbl"> 老師模式：開</span>' : '👩‍🏫<span class="lbl"> 老師模式</span>';
       mb.classList.toggle("on", teacher);
     }
   }
@@ -78,7 +84,8 @@
       recapHTML(t.law) + "</section>" +
 
       '<section class="block"><h3><span class="badge pink">3</span>互動小測 <span class="sub">' +
-      (CH.QUIZ[t.id] ? CH.QUIZ[t.id].length : 0) + " 題 · 新學 + 累積</span></h3>" +
+      (CH.QUIZ[t.id] ? CH.QUIZ[t.id].length : 0) + " 題 · 新學 + 累積 · " +
+      (CH.QUIZ[t.id] ? CH.QUIZ[t.id].filter(function (q) { return q.lv === 3; }).length : 0) + " 題多步挑戰</span></h3>" +
       '<div class="quiz" data-quiz="' + t.id + '"></div></section>';
 
     setTimeout(function () {
@@ -98,10 +105,10 @@
     sec.className = "panel";
     sec.id = "p-final";
     sec.innerHTML =
-      '<div class="hero"><span class="kicker">總複習 · 15 題</span>' +
+      '<div class="hero"><span class="kicker">總複習 · ' + CH.QUIZ.final.length + ' 題</span>' +
       "<h2>綜合測驗：整數指數律全攻略</h2>" +
-      "<p>由定義到科學記數法，一次過檢查你是否真正掌握。每題 15 分，全對另有 20 分獎勵。</p>" +
-      '<div class="bigformula">' + E("a^m × a^n = a^(m+n)") + '<span class="op">·</span>' + E("(a^m)^n = a^(mn)") + '<span class="op">·</span>' + E("a^-n = 1/a^n") + "</div></div>" +
+      "<p>由定義到科學記數法，一次過檢查你是否真正掌握。每題 15 分，全對另有 20 分獎勵；當中有多題要連用 3 條以上公式。</p>" +
+      '<div class="bigformula" style="display:flex;flex-wrap:wrap;gap:4px 14px">' + E("a^m × a^n = a^(m+n)") + '<span class="op">·</span>' + E("(a^m)^n = a^(mn)") + '<span class="op">·</span>' + E("a^-n = 1/a^n") + "</div></div>" +
 
       '<section class="block"><h3><span class="badge sun">★</span>開始測驗 <span class="sub">做完可抽卡</span></h3>' +
       '<div class="quiz" data-quiz="final"></div></section>' +
@@ -169,7 +176,7 @@
   function init() {
     // 分頁列
     var bar = document.getElementById("tabs");
-    var navTabs = TABS.filter(function (t) { return t.kind === "topic" || t.kind === "final"; });
+    var navTabs = TABS.filter(function (t) { return t.kind === "topic" || t.kind === "final" || t.kind === "gacha"; });
     bar.innerHTML = navTabs.map(function (t) {
       return '<button class="tabchip' + (t.kind !== "topic" && t.kind !== "final" ? " special" : "") + '" data-id="' + t.id + '" aria-selected="false">' +
         '<span class="num">' + t.num + "</span>" + t.chip + "</button>";
@@ -179,6 +186,12 @@
     });
 
     // 模式切換
+    var gchip = document.querySelector('.tabchip[data-id="gacha"]');
+    if (gchip) {
+      var tkN = STORE.tickets();
+      gchip.innerHTML = '<span class="num">🎟</span>抽卡' + (tkN > 0 ? '<b class="tkn">' + tkN + "</b>" : "");
+      gchip.classList.toggle("hot", tkN > 0);
+    }
     var mb = document.getElementById("modeBtn");
     if (STORE.s.mode === "teacher") document.body.classList.add("teacher");
     mb.onclick = function () {

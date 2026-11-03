@@ -274,7 +274,7 @@
       var a = +b.value, N = +n.value, v = Math.pow(a, -N);
       q(host, "#wNBV").textContent = a; q(host, "#wNNV").textContent = "-" + N;
       q(host, "#wNBox").innerHTML =
-        '<div class="unit" style="min-width:84px"><div class="cap">有負指數</div><span class="m">' + a + "<sup>-" + N + "</sup></span></div>" +
+        '<div class="unit" style="min-width:84px"><div class="cap">有負指數</div>' + E(a + "^-" + N) + "</div>" +
         '<span class="mulsign">=</span>' +
         '<div class="unit" style="min-width:84px"><div class="cap">倒數</div><span class="m" style="font-size:1.1em">' + F("1", a + "^" + N) + "</span></div>" +
         '<span class="mulsign">=</span>' +
